@@ -39,12 +39,6 @@ namespace HeroExplorer
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
-#if DEBUG
-            if (System.Diagnostics.Debugger.IsAttached)
-            {
-                this.DebugSettings.EnableFrameRateCounter = true;
-            }
-#endif
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
@@ -101,6 +95,29 @@ namespace HeroExplorer
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
+        }
+
+        protected override async void OnActivated(IActivatedEventArgs e)
+        {
+            if (e.Kind != Windows.ApplicationModel.Activation.ActivationKind.VoiceCommand)
+            {
+                return;
+            }
+            var commandArgs = e as Windows.ApplicationModel.Activation.VoiceCommandActivatedEventArgs;
+            var speechRecognitionResult = commandArgs.Result;
+            string voiceCommandName = speechRecognitionResult.RulePath[0];
+
+            Frame rootFrame = Window.Current.Content as Frame;
+            MainPage page = rootFrame.Content as MainPage;
+            if (page == null)
+            {
+                return;
+            }
+            if (voiceCommandName == "refresh")
+            {
+                //call public method on main page
+                await page.Refresh();
+            }
         }
     }
 }
